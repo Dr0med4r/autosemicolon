@@ -1,23 +1,26 @@
 M = {}
 local ts = vim.treesitter
-local parsers = require("nvim-treesitter.parsers")
 
 
 local query_string = [[
-((binding) @wrong
-    (#not-match? @wrong ".*;"))
+((_
+    function:(_) @wrong
+    argument:(_))
+(ERROR))
 ]]
 
 M.add_semicolon = function(args)
-    local parser = parsers.get_parser(args.buf)
+    local parser = assert(ts.get_parser(args.buf))
     local tree = parser:parse()[1]
     local root = tree:root()
     local lang = parser:lang()
     local query = ts.query.parse(lang, query_string)
-    for _, matches, _ in query:iter_matches(root, args.buf, 0, -1) do
-        for _, match in pairs(matches) do
-            local row, column, _ = match:end_()
-            vim.api.nvim_buf_set_text(args.buf, row, column, row, column, { ";" })
+    for _, match, _ in query:iter_matches(root, args.buf) do
+        for _, nodes in pairs(match) do
+            for _, node in pairs(nodes) do
+                local row, column, _ = node:end_()
+                vim.api.nvim_buf_set_text(args.buf, row, column, row, column, { ";" })
+            end
         end
     end
 end
