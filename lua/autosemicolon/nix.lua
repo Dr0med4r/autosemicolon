@@ -7,6 +7,13 @@ local query_string = [[
     function:(_) @wrong
     argument:(_))
 (ERROR))
+
+((_)
+ (ERROR
+   (apply_expression
+     function: (_)@wrong)
+   )
+ expression:(_))
 ]]
 
 M.add_semicolon = function(args)
